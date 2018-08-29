@@ -10,6 +10,7 @@
         "symfony/flex": "^1.1",
         "symfony/form": "*",
         "symfony/framework-bundle": "*",
+        "symfony/monolog-bundle": "^3.3",
         "symfony/orm-pack": "^1.0",
         "symfony/twig-bundle": "*",
         "symfony/validator": "*",
@@ -17,7 +18,8 @@
     },
     "require-dev": {
         "symfony/dotenv": "*",
-        "symfony/maker-bundle": "^1.6"
+        "symfony/maker-bundle": "^1.6",
+        "symfony/profiler-pack": "^1.0"
     },
     "config": {
         "preferred-install": {
