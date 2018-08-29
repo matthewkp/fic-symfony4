@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ArticleRepository")
@@ -36,6 +37,11 @@ class Article
      * @Assert\Type("\DateTime")
      */
     private $datePublished;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Author", inversedBy="articles")
+     */
+    private $author;
 
     public function getId(): ?int
     {
@@ -74,6 +80,18 @@ class Article
     public function setDatePublished(\DateTimeInterface $datePublished): self
     {
         $this->datePublished = $datePublished;
+
+        return $this;
+    }
+
+    public function getAuthor(): ?Author
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(?Author $author): self
+    {
+        $this->author = $author;
 
         return $this;
     }

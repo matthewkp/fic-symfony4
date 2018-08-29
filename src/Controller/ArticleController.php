@@ -36,11 +36,19 @@ class ArticleController extends AbstractController
     /**
      * @Route("/add", name="add")
      */
-    public function add(LoggerInterface $logger)
+    public function add(LoggerInterface $logger, Request $request)
     {
         $form = $this->createForm(ArticleType::class);
 
         $logger->info('Display -Add an article- page');
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $article = $form->getData();
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($article);
+            $entityManager->flush();
+        }
 
         return $this->render('add.html.twig', [
             'form' => $form->createView(),
