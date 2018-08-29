@@ -1,7 +1,11 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Article{% endblock %}
+{% block title %}{{ article.title }}{% endblock %}
 
 {% block body %}
-    <p>{{ content }}</p>
+<div class="col-sm-8">
+    <h1>{{ article.title }}</h1>
+    <p>{{ article.datePublished|date("m/d/Y H:m") }}</p>
+    <p class="text-justify">{{ article.content }}</p>
+</div>
 {% endblock %}

@@ -3,8 +3,10 @@
 {% block title %}Add an article{% endblock %}
 
 {% block body %}
+<div class="col-sm-8">
     {{ form_start(form) }}
     {{ form_widget(form) }}
     <input type="submit" class="btn btn-primary" value="Add article" />
     {{ form_end(form) }}
+</div>
 {% endblock %}

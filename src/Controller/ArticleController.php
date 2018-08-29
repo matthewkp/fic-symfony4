@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Article;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -24,12 +25,20 @@ class ArticleController extends AbstractController
     }
 
     /**
-     * @Route("/my-first-article", name="article")
+     * @Route("/article/{id}", name="article")
      */
-    public function article()
+    public function article($id)
     {
+        $article = $this->getDoctrine()
+            ->getRepository(Article::class)
+            ->find($id);
+
+        if (!$article) {
+            throw $this->createNotFoundException('The article does not exist');
+        }
+
         return $this->render('article.html.twig', [
-            'content' => 'Mon premier article',
+            'article' => $article,
         ]);
     }
 
@@ -52,6 +61,17 @@ class ArticleController extends AbstractController
 
         return $this->render('add.html.twig', [
             'form' => $form->createView(),
+        ]);
+    }
+
+    public function sidebar($numberOfArticles)
+    {
+        $articles = $this->getDoctrine()
+            ->getRepository(Article::class)
+            ->findMostRecent($numberOfArticles);
+
+        return $this->render('sidebar.html.twig', [
+            'articles' => $articles,
         ]);
     }
 }
