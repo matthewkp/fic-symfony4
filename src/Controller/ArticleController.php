@@ -10,13 +10,16 @@ use Symfony\Component\Routing\Annotation\Route;
 class ArticleController extends AbstractController
 {
     /**
-    * @Route("/", name="homepage")
-    */
+     * @Route("/", name="homepage")
+     */
     public function homepage(Request $request)
     {
         $languages = 'User preferred languages are: ' . implode(', ', $request->getLanguages());
 
-        return new Response('Homepage <br>' . $languages);
+        return $this->render('homepage.html.twig', [
+            'content' => 'Homepage',
+            'languages' => $languages
+        ]);
     }
 
     /**
@@ -24,6 +27,8 @@ class ArticleController extends AbstractController
      */
     public function article()
     {
-        return new Response('Mon premier article');
+        return $this->render('article.html.twig', [
+            'content' => 'Mon premier article',
+        ]);
     }
 }
