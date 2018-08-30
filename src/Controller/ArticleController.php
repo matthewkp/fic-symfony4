@@ -16,13 +16,13 @@ class ArticleController extends AbstractController
     /**
      * @Route("/{_locale}", name="homepage")
      */
-    public function homepage(Request $request) : Response
+    public function homepage(Request $request, string $homepageNumberOfArticles) : Response
     {
         $languages = 'User preferred languages are: ' . implode(', ', $request->getLanguages());
 
         $articles = $this->getDoctrine()
             ->getRepository(Article::class)
-            ->findMostRecent(10);
+            ->findMostRecent($homepageNumberOfArticles);
 
         $totalArticles = $this->getDoctrine()
             ->getRepository(Article::class)
