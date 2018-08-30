@@ -2,7 +2,8 @@
 
 {% block body %}
 <div class="col-sm-8 offset-sm-2">
-    <p>{{ content }}</p>
+    <p>{{ 'welcome.message'|trans }}</p>
+    <p>{{ 'articles.count.text'|transchoice(totalArticles) }}</p>
     <p>{{ languages }}</p>
 </div>
 {% endblock %}

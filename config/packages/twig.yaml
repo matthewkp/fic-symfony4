@@ -4,5 +4,7 @@ twig:
     strict_variables: '%kernel.debug%'
     globals:
         tracking_code: 123456
+        available_locales:
+          ['en', 'fr']
     form_themes:
         ['bootstrap_4_layout.html.twig']

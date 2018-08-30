@@ -10,8 +10,13 @@
   <body>
     <header>
         <div class="mx-auto" style="width: 200px; padding: 30px 0;">
-            <p class="h1">My articles</p>
+            <p class="h1"><a href="{{ path('homepage') }}">My articles</a></p>
         </div>
+        <p class="text-center">
+            {% for lang in available_locales %}
+                <a href="{{ path('homepage', {'_locale': lang}) }}">{{ lang }}</a>
+            {% endfor %}
+        </p>
     </header>
     <div class="container">
         <div class="row">
@@ -24,6 +29,7 @@
         </div>
     </div>
     <footer style="padding: 50px 0;">
+        <p class="text-center"><a href="{{ path('add') }}">{{ 'add.article'|trans }}</a></p>
         <p class="text-center">Tracking code from twig globals: {{ tracking_code }}</p>
     </footer>
   </body>

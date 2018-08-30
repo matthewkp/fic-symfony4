@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Article;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Form\ArticleType;
 use Psr\Log\LoggerInterface;
@@ -12,22 +13,26 @@ use Psr\Log\LoggerInterface;
 class ArticleController extends AbstractController
 {
     /**
-     * @Route("/", name="homepage")
+     * @Route("/{_locale}", name="homepage")
      */
-    public function homepage(Request $request)
+    public function homepage(Request $request) : Response
     {
         $languages = 'User preferred languages are: ' . implode(', ', $request->getLanguages());
 
+        $totalArticles = $this->getDoctrine()
+            ->getRepository(Article::class)
+            ->countArticles();
+
         return $this->render('homepage.html.twig', [
-            'content' => 'Homepage',
-            'languages' => $languages
+            'languages' => $languages,
+            'totalArticles' => $totalArticles,
         ]);
     }
 
     /**
-     * @Route("/article/{id}", name="article")
+     * @Route("/{_locale}/article/{id}", name="article")
      */
-    public function article($id)
+    public function article($id) : Response
     {
         $article = $this->getDoctrine()
             ->getRepository(Article::class)
@@ -43,9 +48,9 @@ class ArticleController extends AbstractController
     }
 
     /**
-     * @Route("/add", name="add")
+     * @Route("/{_locale}/add", name="add")
      */
-    public function add(LoggerInterface $logger, Request $request)
+    public function add(LoggerInterface $logger, Request $request) : Response
     {
         $form = $this->createForm(ArticleType::class);
 
@@ -64,7 +69,7 @@ class ArticleController extends AbstractController
         ]);
     }
 
-    public function sidebar($numberOfArticles)
+    public function sidebar($numberOfArticles) : Response
     {
         $articles = $this->getDoctrine()
             ->getRepository(Article::class)
