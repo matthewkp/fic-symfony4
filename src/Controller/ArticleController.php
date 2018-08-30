@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Article;
+use App\Utils\Slugger;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,24 +20,29 @@ class ArticleController extends AbstractController
     {
         $languages = 'User preferred languages are: ' . implode(', ', $request->getLanguages());
 
+        $articles = $this->getDoctrine()
+            ->getRepository(Article::class)
+            ->findMostRecent(10);
+
         $totalArticles = $this->getDoctrine()
             ->getRepository(Article::class)
             ->countArticles();
 
         return $this->render('homepage.html.twig', [
             'languages' => $languages,
+            'articles' => $articles,
             'totalArticles' => $totalArticles,
         ]);
     }
 
     /**
-     * @Route("/{_locale}/article/{id}", name="article")
+     * @Route("/{_locale}/article/{slug}", name="article")
      */
-    public function article($id) : Response
+    public function article($slug) : Response
     {
         $article = $this->getDoctrine()
             ->getRepository(Article::class)
-            ->find($id);
+            ->findOneBySlug($slug);
 
         if (!$article) {
             throw $this->createNotFoundException('The article does not exist');
@@ -50,7 +56,7 @@ class ArticleController extends AbstractController
     /**
      * @Route("/{_locale}/add", name="add")
      */
-    public function add(LoggerInterface $logger, Request $request) : Response
+    public function add(LoggerInterface $logger, Request $request, Slugger $slugger) : Response
     {
         $form = $this->createForm(ArticleType::class);
 
@@ -59,6 +65,8 @@ class ArticleController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $article = $form->getData();
+            $article->setSlug($slugger->run($article->getTitle()));
+
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($article);
             $entityManager->flush();

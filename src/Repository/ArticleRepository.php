@@ -41,15 +41,17 @@ class ArticleRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
-    /*
-    public function findOneBySomeField($value): ?Article
+    /**
+     * @param $value
+     * @return Article[] Returns an array of Article objects
+     */
+    public function findOneBySlug($value): ?Article
     {
         return $this->createQueryBuilder('a')
-            ->andWhere('a.exampleField = :val')
+            ->andWhere('a.slug = :val')
             ->setParameter('val', $value)
             ->getQuery()
             ->getOneOrNullResult()
         ;
     }
-    */
 }

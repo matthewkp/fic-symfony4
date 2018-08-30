@@ -1,7 +1,7 @@
 <ul class="list-group list-group-flush">
     {% for article in articles %}
         <li class="list-group-item">
-            <a href="{{ path('article', {'id': article.id}) }}">{{ article.datePublished|date("m/d/Y H:m") }} | {{ article.title }}</a>
+            <a href="{{ path('article', {'slug': article.slug}) }}">{{ article.datePublished|date("m/d/Y H:m") }} | {{ article.title }}</a>
         </li>
     {% else %}
         <li><em>No articles available</em></li>
