@@ -4,61 +4,60 @@ namespace App\Controller;
 
 use App\Entity\Article;
 use App\Utils\Slugger;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Form\ArticleType;
 use Psr\Log\LoggerInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\FormFactoryInterface;
+use Twig\Environment;
 
-class ArticleController extends AbstractController
+class ArticleController
 {
     /**
      * @Route("/{_locale}", name="homepage")
      */
-    public function homepage(Request $request, string $homepageNumberOfArticles) : Response
+    public function homepage(Request $request, EntityManagerInterface $entityManager, Environment $twig, string $homepageNumberOfArticles) : Response
     {
         $languages = 'User preferred languages are: ' . implode(', ', $request->getLanguages());
 
-        $articles = $this->getDoctrine()
-            ->getRepository(Article::class)
+        $articles = $entityManager->getRepository(Article::class)
             ->findMostRecent($homepageNumberOfArticles);
 
-        $totalArticles = $this->getDoctrine()
-            ->getRepository(Article::class)
+        $totalArticles = $entityManager->getRepository(Article::class)
             ->countArticles();
 
-        return $this->render('homepage.html.twig', [
+        return new Response($twig->render('homepage.html.twig', [
             'languages' => $languages,
             'articles' => $articles,
             'totalArticles' => $totalArticles,
-        ]);
+        ]));
     }
 
     /**
      * @Route("/{_locale}/article/{slug}", name="article")
      */
-    public function article($slug) : Response
+    public function article($slug, EntityManagerInterface $entityManager, Environment $twig) : Response
     {
-        $article = $this->getDoctrine()
-            ->getRepository(Article::class)
+        $article = $entityManager->getRepository(Article::class)
             ->findOneBySlug($slug);
 
         if (!$article) {
-            throw $this->createNotFoundException('The article does not exist');
+            return new Response('The article does not exist',404);
         }
 
-        return $this->render('article.html.twig', [
+        return new Response($twig->render('article.html.twig', [
             'article' => $article,
-        ]);
+        ]));
     }
 
     /**
      * @Route("/{_locale}/add", name="add")
      */
-    public function add(LoggerInterface $logger, Request $request, Slugger $slugger) : Response
+    public function add(LoggerInterface $logger, Request $request, FormFactoryInterface $formFactory, EntityManagerInterface $entityManager, Environment $twig, Slugger $slugger) : Response
     {
-        $form = $this->createForm(ArticleType::class);
+        $form = $formFactory->create(ArticleType::class);
 
         $logger->info('Display -Add an article- page');
 
@@ -67,24 +66,22 @@ class ArticleController extends AbstractController
             $article = $form->getData();
             $article->setSlug($slugger->run($article->getTitle()));
 
-            $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($article);
             $entityManager->flush();
         }
 
-        return $this->render('add.html.twig', [
+        return new Response($twig->render('add.html.twig', [
             'form' => $form->createView(),
-        ]);
+        ]));
     }
 
-    public function sidebar($numberOfArticles) : Response
+    public function sidebar(EntityManagerInterface $entityManager, Environment $twig, $numberOfArticles) : Response
     {
-        $articles = $this->getDoctrine()
-            ->getRepository(Article::class)
+        $articles = $entityManager->getRepository(Article::class)
             ->findMostRecent($numberOfArticles);
 
-        return $this->render('sidebar.html.twig', [
+        return new Response($twig->render('sidebar.html.twig', [
             'articles' => $articles,
-        ]);
+        ]));
     }
 }
