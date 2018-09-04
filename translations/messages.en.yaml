@@ -1,3 +1,4 @@
 welcome.message: Welcome to my website
 articles.count.text: '{0}No articles|{1}%count% article in total|]1,Inf[%count% articles in total'
 add.article: Add an article
+flash.message.article.success: Your article has been successfully added.

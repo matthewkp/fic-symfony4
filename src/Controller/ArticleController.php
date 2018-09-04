@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Article;
 use App\Utils\Slugger;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -12,13 +13,21 @@ use Psr\Log\LoggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Twig\Environment;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Session\Session;
 
-class ArticleController
+class ArticleController extends AbstractController
 {
     /**
      * @Route("/{_locale}", name="homepage")
      */
-    public function homepage(Request $request, EntityManagerInterface $entityManager, Environment $twig, string $homepageNumberOfArticles) : Response
+    public function homepage(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        Environment $twig,
+        string $homepageNumberOfArticles
+    ) : Response
     {
         $languages = 'User preferred languages are: ' . implode(', ', $request->getLanguages());
 
@@ -38,7 +47,11 @@ class ArticleController
     /**
      * @Route("/{_locale}/article/{slug}", name="article")
      */
-    public function article($slug, EntityManagerInterface $entityManager, Environment $twig) : Response
+    public function article(
+        $slug,
+        EntityManagerInterface $entityManager,
+        Environment $twig
+    ) : Response
     {
         $article = $entityManager->getRepository(Article::class)
             ->findOneBySlug($slug);
@@ -55,7 +68,16 @@ class ArticleController
     /**
      * @Route("/{_locale}/add", name="add")
      */
-    public function add(LoggerInterface $logger, Request $request, FormFactoryInterface $formFactory, EntityManagerInterface $entityManager, Environment $twig, Slugger $slugger) : Response
+    public function add(
+        LoggerInterface $logger,
+        Request $request,
+        FormFactoryInterface $formFactory,
+        EntityManagerInterface $entityManager,
+        Environment $twig,
+        Slugger $slugger,
+        UrlGeneratorInterface $urlGenerator,
+        Session $session
+    ) : Response
     {
         $form = $formFactory->create(ArticleType::class);
 
@@ -68,6 +90,12 @@ class ArticleController
 
             $entityManager->persist($article);
             $entityManager->flush();
+
+            $session->getFlashBag()->add('success', 'flash.message.article.success');
+
+            return new RedirectResponse(
+                $urlGenerator->generate('article', ['slug' => $article->getSlug()])
+            );
         }
 
         return new Response($twig->render('add.html.twig', [
@@ -75,7 +103,11 @@ class ArticleController
         ]));
     }
 
-    public function sidebar(EntityManagerInterface $entityManager, Environment $twig, $numberOfArticles) : Response
+    public function sidebar(
+        EntityManagerInterface $entityManager,
+        Environment $twig,
+        $numberOfArticles
+    ) : Response
     {
         $articles = $entityManager->getRepository(Article::class)
             ->findMostRecent($numberOfArticles);
