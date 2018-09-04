@@ -23,7 +23,7 @@
             {% block body %}{% endblock %}
             <div class="col-sm-4">
                 {% block sidebar %}
-                    {{ render(controller('App\\Controller\\ArticleController::sidebar', { 'numberOfArticles': 10 })) }}
+                    {{ render_esi(controller('App\\Controller\\ArticleController::sidebar', { 'numberOfArticles': 10 })) }}
                 {% endblock %}
             </div>
         </div>

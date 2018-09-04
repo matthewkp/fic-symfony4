@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Article;
 use App\Utils\Slugger;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,7 +16,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 
-class ArticleController extends AbstractController
+class ArticleController
 {
     /**
      * @Route("/{_locale}", name="homepage")
@@ -50,19 +49,31 @@ class ArticleController extends AbstractController
     public function article(
         $slug,
         EntityManagerInterface $entityManager,
-        Environment $twig
+        Environment $twig,
+        Request $request
     ) : Response
     {
+        /** @var $article Article * */
         $article = $entityManager->getRepository(Article::class)
             ->findOneBySlug($slug);
 
         if (!$article) {
-            return new Response('The article does not exist',404);
+            return new Response('The article does not exist', 404);
         }
 
-        return new Response($twig->render('article.html.twig', [
+        $response = new Response($twig->render('article.html.twig', [
             'article' => $article,
         ]));
+
+        $response->setEtag(md5($article->getSlug() . $request->getLocale()));
+        $response->setLastModified($article->getDatePublished());
+        $response->setPublic();
+
+        if ($response->isNotModified($request)) {
+            return $response;
+        }
+
+        return $response;
     }
 
     /**
@@ -112,8 +123,13 @@ class ArticleController extends AbstractController
         $articles = $entityManager->getRepository(Article::class)
             ->findMostRecent($numberOfArticles);
 
-        return new Response($twig->render('sidebar.html.twig', [
+        $response = new Response($twig->render('sidebar.html.twig', [
             'articles' => $articles,
         ]));
+
+        $response->setPublic();
+        $response->setSharedMaxAge(600);
+
+        return $response;
     }
 }

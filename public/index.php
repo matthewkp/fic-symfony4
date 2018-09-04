@@ -1,5 +1,6 @@
 <?php
 
+use App\CacheKernel;
 use App\Kernel;
 use Symfony\Component\Debug\Debug;
 use Symfony\Component\Dotenv\Dotenv;
@@ -33,6 +34,11 @@ if ($trustedHosts = $_SERVER['TRUSTED_HOSTS'] ?? false) {
 }
 
 $kernel = new Kernel($env, $debug);
+// Wrap the default Kernel with the CacheKernel one in 'prod' environment
+// For testing purposes, we have http cache activated for any environment
+//if ('prod' === $env) {
+    $kernel = new CacheKernel($kernel);
+//}
 $request = Request::createFromGlobals();
 $response = $kernel->handle($request);
 $response->send();
