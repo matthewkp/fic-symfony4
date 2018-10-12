@@ -58,7 +58,7 @@ class ArticleController extends AbstractController
             ->findOneBySlug($slug);
 
         if (!$article) {
-            return new Response('The article does not exist',404);
+            throw $this->createNotFoundException('The article does not exist');
         }
 
         return $this->render('article.html.twig', [
