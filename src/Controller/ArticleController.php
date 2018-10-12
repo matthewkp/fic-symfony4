@@ -37,7 +37,11 @@ class ArticleController extends AbstractController
      */
     public function add()
     {
-        $form = $this->createForm(ArticleType::class);
+        $form = $this->createForm(
+            ArticleType::class,
+            null,
+            ['display_submit' => true]
+        );
 
         return $this->render('add.html.twig', [
             'form' => $form->createView(),
