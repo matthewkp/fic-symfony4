@@ -6,12 +6,14 @@ use App\Entity\Article;
 use App\Utils\Slugger;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Form\ArticleType;
 use Psr\Log\LoggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Twig\Environment;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ArticleController
 {
@@ -55,23 +57,25 @@ class ArticleController
     /**
      * @Route("/{_locale}/add", name="add")
      */
-    public function add(LoggerInterface $logger, Request $request, FormFactoryInterface $formFactory, EntityManagerInterface $entityManager, Environment $twig, Slugger $slugger) : Response
+    public function add(LoggerInterface $logger, Request $request, FormFactoryInterface $formFactory, EntityManagerInterface $entityManager, Environment $twig, UrlGeneratorInterface $urlGenerator, Slugger $slugger) : Response
     {
+        $article = new Article();
         $form = $formFactory->create(
             ArticleType::class,
-            null,
+            $article,
             ['display_submit' => true]
         );
 
         $logger->info('Display -Add an article- page');
 
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $article = $form->getData();
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             $article->setSlug($slugger->run($article->getTitle()));
-
             $entityManager->persist($article);
             $entityManager->flush();
+
+            return new RedirectResponse(
+                $urlGenerator->generate('article', ['slug' => $article->getSlug()])
+            );
         }
 
         return new Response($twig->render('add.html.twig', [
