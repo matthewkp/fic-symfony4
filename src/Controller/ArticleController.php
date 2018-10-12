@@ -41,7 +41,7 @@ class ArticleController
     }
 
     /**
-     * @Route("/{_locale}/article/{slug}", name="article")
+     * @Route("/article/{slug}", name="article")
      */
     public function article($slug, EntityManagerInterface $entityManager, Environment $twig) : Response
     {
