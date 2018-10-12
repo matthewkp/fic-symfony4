@@ -18,12 +18,21 @@ class ArticleType extends AbstractType
             ->add('content', TextType::class)
             ->add('datePublished', DateTimeType::class)
         ;
+
+        if (isset($options['display_submit']) && $options['display_submit']) {
+            $builder
+                ->add('submit', SubmitType::class, [
+                    'attr' => ['class' => 'btn btn-primary'],
+                    'label' => 'Add article',
+                ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
             'data_class' => Article::class,
+            'display_submit' => false,
         ]);
     }
 }
