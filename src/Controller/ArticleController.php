@@ -58,22 +58,22 @@ class ArticleController extends AbstractController
      */
     public function add(LoggerInterface $logger, Request $request, Slugger $slugger) : Response
     {
+        $article = new Article();
         $form = $this->createForm(
             ArticleType::class,
-            null,
+            $article,
             ['display_submit' => true]
         );
 
         $logger->info('Display -Add an article- page');
 
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $article = $form->getData();
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             $article->setSlug($slugger->run($article->getTitle()));
-
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($article);
             $entityManager->flush();
+
+            return $this->redirectToRoute('article', ['slug' => $article->getSlug()]);
         }
 
         return $this->render('add.html.twig', [
