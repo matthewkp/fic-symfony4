@@ -9,79 +9,100 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Form\ArticleType;
 use Psr\Log\LoggerInterface;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Form\FormFactoryInterface;
-use Twig\Environment;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class ArticleController
+/**
+ * @Route("/{_locale}", defaults={"_locale": "en"}, requirements={"_locale": "en|fr"})
+ */
+class ArticleController extends AbstractController
 {
     /**
-     * @Route("/{_locale}", name="homepage")
+     * Adding default subscribed services and our services
+     *
+     * @return array
      */
-    public function homepage(Request $request, EntityManagerInterface $entityManager, Environment $twig, string $homepageNumberOfArticles) : Response
+    public static function getSubscribedServices() : array
     {
-        $languages = 'User preferred languages are: ' . implode(', ', $request->getLanguages());
-
-        $articles = $entityManager->getRepository(Article::class)
-            ->findMostRecent($homepageNumberOfArticles);
-
-        $totalArticles = $entityManager->getRepository(Article::class)
-            ->countArticles();
-
-        return new Response($twig->render('homepage.html.twig', [
-            'languages' => $languages,
-            'articles' => $articles,
-            'totalArticles' => $totalArticles,
-        ]));
+        return \array_merge(parent::getSubscribedServices(), [
+            'logger' => LoggerInterface::class,
+            'slugger' => Slugger::class,
+        ]);
     }
 
     /**
-     * @Route("/{_locale}/article/{slug}", name="article")
+     * @Route("", name="homepage")
      */
-    public function article($slug, EntityManagerInterface $entityManager, Environment $twig) : Response
+    public function homepage(Request $request, string $homepageNumberOfArticles) : Response
     {
-        $article = $entityManager->getRepository(Article::class)
+        $languages = 'User preferred languages are: ' . implode(', ', $request->getLanguages());
+
+        $articles = $this->getDoctrine()->getRepository(Article::class)
+            ->findMostRecent($homepageNumberOfArticles);
+
+        $totalArticles = $this->getDoctrine()->getRepository(Article::class)
+            ->countArticles();
+
+        return $this->render('homepage.html.twig', [
+            'languages' => $languages,
+            'articles' => $articles,
+            'totalArticles' => $totalArticles,
+        ]);
+    }
+
+    /**
+     * @Route("/article/{slug}", name="article")
+     */
+    public function article($slug) : Response
+    {
+        $article = $this->getDoctrine()->getRepository(Article::class)
             ->findOneBySlug($slug);
 
         if (!$article) {
             return new Response('The article does not exist',404);
         }
 
-        return new Response($twig->render('article.html.twig', [
+        return $this->render('article.html.twig', [
             'article' => $article,
-        ]));
+        ]);
     }
 
     /**
-     * @Route("/{_locale}/add", name="add")
+     * @Route("/add", name="add")
      */
-    public function add(LoggerInterface $logger, Request $request, FormFactoryInterface $formFactory, EntityManagerInterface $entityManager, Environment $twig, Slugger $slugger) : Response
+    public function add(Request $request) : Response
     {
-        $form = $formFactory->create(ArticleType::class);
+        $article = new Article();
+        $form = $this->createForm(
+            ArticleType::class,
+            $article,
+            ['display_submit' => true]
+        );
 
-        $logger->info('Display -Add an article- page');
+        $this->get('logger')->info('Display -Add an article- page');
 
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $article = $form->getData();
-            $article->setSlug($slugger->run($article->getTitle()));
-
+        if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
+            $article->setSlug(
+                $this->get('slugger')->run($article->getTitle()
+            ));
+            $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($article);
             $entityManager->flush();
+
+            return $this->redirectToRoute('article', ['slug' => $article->getSlug()]);
         }
 
-        return new Response($twig->render('add.html.twig', [
+        return $this->render('add.html.twig', [
             'form' => $form->createView(),
-        ]));
+        ]);
     }
 
-    public function sidebar(EntityManagerInterface $entityManager, Environment $twig, $numberOfArticles) : Response
+    public function sidebar($numberOfArticles) : Response
     {
-        $articles = $entityManager->getRepository(Article::class)
+        $articles = $this->getDoctrine()->getRepository(Article::class)
             ->findMostRecent($numberOfArticles);
 
-        return new Response($twig->render('sidebar.html.twig', [
+        return $this->render('sidebar.html.twig', [
             'articles' => $articles,
-        ]));
+        ]);
     }
 }
