@@ -15,10 +15,13 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Twig\Environment;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+/**
+ * @Route("/{_locale}", defaults={"_locale": "en"}, requirements={"_locale": "en|fr"})
+ */
 class ArticleController
 {
     /**
-     * @Route("/{_locale}", name="homepage")
+     * @Route("", name="homepage")
      */
     public function homepage(Request $request, EntityManagerInterface $entityManager, Environment $twig, string $homepageNumberOfArticles) : Response
     {
@@ -55,7 +58,7 @@ class ArticleController
     }
 
     /**
-     * @Route("/{_locale}/add", name="add")
+     * @Route("/add", name="add")
      */
     public function add(LoggerInterface $logger, Request $request, FormFactoryInterface $formFactory, EntityManagerInterface $entityManager, Environment $twig, UrlGeneratorInterface $urlGenerator, Slugger $slugger) : Response
     {
