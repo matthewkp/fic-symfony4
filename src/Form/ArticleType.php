@@ -9,6 +9,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 class ArticleType extends AbstractType
 {
@@ -19,12 +20,21 @@ class ArticleType extends AbstractType
             ->add('content', TextareaType::class)
             ->add('datePublished', DateTimeType::class)
         ;
+
+        if (isset($options['display_submit']) && $options['display_submit']) {
+            $builder
+                ->add('submit', SubmitType::class, [
+                    'attr' => ['class' => 'btn btn-primary'],
+                    'label' => 'Add article',
+                ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
             'data_class' => Article::class,
+            'display_submit' => false,
         ]);
     }
 }
