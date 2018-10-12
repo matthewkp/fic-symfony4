@@ -57,7 +57,11 @@ class ArticleController
      */
     public function add(LoggerInterface $logger, Request $request, FormFactoryInterface $formFactory, EntityManagerInterface $entityManager, Environment $twig, Slugger $slugger) : Response
     {
-        $form = $formFactory->create(ArticleType::class);
+        $form = $formFactory->create(
+            ArticleType::class,
+            null,
+            ['display_submit' => true]
+        );
 
         $logger->info('Display -Add an article- page');
 
