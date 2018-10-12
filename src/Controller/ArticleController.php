@@ -11,10 +11,13 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Form\ArticleType;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @Route("/{_locale}", defaults={"_locale": "en"}, requirements={"_locale": "en|fr"})
+ */
 class ArticleController extends AbstractController
 {
     /**
-     * @Route("/{_locale}", name="homepage")
+     * @Route("", name="homepage")
      */
     public function homepage(Request $request, string $homepageNumberOfArticles) : Response
     {
@@ -36,7 +39,7 @@ class ArticleController extends AbstractController
     }
 
     /**
-     * @Route("/{_locale}/article/{slug}", name="article")
+     * @Route("/article/{slug}", name="article")
      */
     public function article($slug) : Response
     {
@@ -54,7 +57,7 @@ class ArticleController extends AbstractController
     }
 
     /**
-     * @Route("/{_locale}/add", name="add")
+     * @Route("/add", name="add")
      */
     public function add(LoggerInterface $logger, Request $request, Slugger $slugger) : Response
     {
