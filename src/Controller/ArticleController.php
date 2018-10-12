@@ -58,7 +58,11 @@ class ArticleController extends AbstractController
      */
     public function add(LoggerInterface $logger, Request $request, Slugger $slugger) : Response
     {
-        $form = $this->createForm(ArticleType::class);
+        $form = $this->createForm(
+            ArticleType::class,
+            null,
+            ['display_submit' => true]
+        );
 
         $logger->info('Display -Add an article- page');
 
