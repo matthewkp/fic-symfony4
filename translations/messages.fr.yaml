@@ -1,4 +1,4 @@
 welcome.message: Bienvenue sur mon site web
-articles.count.text: '{0}Pas d&quot;articles|{1}%count% article en total|]1,Inf[%count% articles en total'
+articles.count.text: "{0}Pas d'articles|{1}%count% article en total|]1,Inf[%count% articles en total"
 add.article: Ajouter un article
 flash.message.article.success: Votre article a été ajouté avec succès.
