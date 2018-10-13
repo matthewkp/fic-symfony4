@@ -67,7 +67,7 @@ class ArticleController extends AbstractController
         ]));
 
         // Cache with invalidation
-        // A property dateUpdated would make more sens
+        // A property dateUpdated would make more sense
         // as we need to update cache whenever the article is updated
         $response->setLastModified($article->getDatePublished());
         $response->setPublic();
