@@ -52,8 +52,9 @@ class ArticleController extends AbstractController
     /**
      * @Route("/article/{slug}", name="article")
      */
-    public function article($slug) : Response
+    public function article(Request $request, $slug) : Response
     {
+        /** @var $article Article */
         $article = $this->getDoctrine()->getRepository(Article::class)
             ->findOneBySlug($slug);
 
@@ -61,9 +62,23 @@ class ArticleController extends AbstractController
             throw $this->createNotFoundException('The article does not exist');
         }
 
-        return $this->render('article.html.twig', [
+        $response = new Response($this->render('article.html.twig', [
             'article' => $article,
-        ]);
+        ]));
+
+        // Cache with invalidation
+        // A property dateUpdated would make more sens
+        // as we need to update cache whenever the article is updated
+        $response->setLastModified($article->getDatePublished());
+        $response->setPublic();
+
+        if ($response->isNotModified($request)) {
+            return $response;
+        }
+
+        // Do more process here
+
+        return $response;
     }
 
     /**
@@ -107,6 +122,7 @@ class ArticleController extends AbstractController
             'articles' => $articles,
         ]));
 
+        // Cache with expiration
         $response->setPublic();
         $response->setSharedMaxAge(600);
 
