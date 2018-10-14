@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Form\ArticleType;
 use Psr\Log\LoggerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
@@ -51,17 +52,10 @@ class ArticleController extends AbstractController
 
     /**
      * @Route("/article/{slug}", name="article")
+     * @ParamConverter("article", options={"mapping"={"slug"="slug"}})
      */
-    public function article(Request $request, $slug) : Response
+    public function article(Request $request, Article $article) : Response
     {
-        /** @var $article Article */
-        $article = $this->getDoctrine()->getRepository(Article::class)
-            ->findOneBySlug($slug);
-
-        if (!$article) {
-            throw $this->createNotFoundException('The article does not exist');
-        }
-
         $response = new Response($this->render('article.html.twig', [
             'article' => $article,
         ]));
