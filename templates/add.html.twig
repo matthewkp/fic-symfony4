@@ -5,7 +5,15 @@
 {% block body %}
 <div class="col-sm-8">
     {{ form_start(form) }}
-    {{ form_widget(form) }}
+
+    <h5>New article</h5>
+    {{ form_row(form.title) }}
+    {{ form_row(form.content) }}
+    {{ form_row(form.datePublished) }}
+
+    <h5>Authors</h5>
+    <ul class="authors" data-prototype="{{ form_widget(form.authors.vars.prototype)|e('html_attr') }}">
+    </ul>
     {{ form_end(form) }}
 </div>
 {% endblock %}

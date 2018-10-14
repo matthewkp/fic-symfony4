@@ -8,5 +8,10 @@
     <h1>{{ article.title }}</h1>
     <p>{{ article.datePublished|date("m/d/Y H:i") }}</p>
     <p class="text-justify">{{ article.content }}</p>
+    Authors: <em>
+    {% for author in article.authors %}
+        {{ author.name }}{% if not loop.last %},{% endif %}
+    {% endfor %}
+    </em>
 </div>
 {% endblock %}
